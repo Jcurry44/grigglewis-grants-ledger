@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<link rel="canonical" href="https://jcurry44.github.io/grigglewis-grants-ledger/">
 <meta name="robots" content="noindex, nofollow">
 <title>Grigg Lewis Foundation — Grants Ledger · 990-PF</title>
 <meta name="description" content="Every grant Grigg Lewis Foundation reported in its Form 990-PF grants-paid schedule, 2020 and 2022–2024 — 326 grants, $5,817,145, reconciling to Part I line 25(d) to the dollar. An independent presentation built from public IRS filings.">
@@ -1452,8 +1451,12 @@ select {
           itself — first the filed purpose, then (only when the purpose names no field) the
           recipient’s filed name. Every rule is published below; anything no rule matches is left
           unassigned rather than guessed. The filed purpose text on every ledger row remains the record.
+          On this page there is a third step: when the filed purpose names no field and the recipient’s name matches no published rule, the recipient’s own classification in the IRS Business Master File (its NTEE code) is used — accepted only when the filing’s own recipient state pins the name to exactly one organization, when the name is nationally unique, when every same-named listing carries one classification, or when all listings are chapters of a single group exemption. Names with conflicting listings stay unassigned, as do IRS groups with no honest home in these categories.
         </p>
         <div id="cat-map"></div>
+        <h4 style="margin:1.1rem 0 0.3rem; font-size:0.95rem;">Step 3 — the recipient’s IRS classification</h4>
+        <p style="font-size:0.9rem;">26 recipients are grouped this way on this page. The crosswalk from the IRS’s major groups to these categories, in full:</p>
+        <div class="tw" style="overflow-x:auto;"><table class="grant-table" style="font-size:0.85rem;"><thead><tr><th>IRS major group (NTEE)</th><th>Category here</th></tr></thead><tbody><tr><td class="cm-kw">A — Arts</td><td class="cm-cat">Arts & culture</td></tr><tr><td class="cm-kw">B — Education</td><td class="cm-cat">Education & youth</td></tr><tr><td class="cm-kw">C, D — Environment, animals</td><td class="cm-cat">Environment & animals</td></tr><tr><td class="cm-kw">E–H, N — Health, mental health, disease, research, recreation</td><td class="cm-cat">Health & wellbeing</td></tr><tr><td class="cm-kw">I, K, L, M, P — Legal aid, food, housing, safety, human services</td><td class="cm-cat">Basic needs & response</td></tr><tr><td class="cm-kw">J, S, W — Employment, community improvement, public benefit</td><td class="cm-cat">Community & economic development</td></tr><tr><td class="cm-kw">O — Youth development</td><td class="cm-cat">Education & youth</td></tr><tr><td class="cm-kw">T — Philanthropy & grantmaking</td><td class="cm-cat">Nonprofit capacity & transitions</td></tr><tr><td class="cm-kw">Q, R, U, V, X, Y, Z — International, civil rights, science, social science, religion, other</td><td class="cm-cat">stay in “other”</td></tr></tbody></table></div>
         <h3>Limitations</h3>
         <p>
           Recipient location is the mailing address on the filing, not a service area. Display casing
@@ -1628,6 +1631,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
   // filed name. No rule, no guess: the rest stays in "Other filed purposes."
   // The Methodology mapping table renders FROM these arrays — table and classifier
   // cannot drift apart.
+  const NTEE_MAP = {"ANCHORING HOPE OF NY INC":"Health & wellbeing","COMMUNITY FOUNDATION FOR GREATER BUFFALO":"Nonprofit capacity & transitions","DALE ASSOCIATION INC":"Basic needs & response","HEARTS AND HANDS FAITH IN ACTION":"Basic needs & response","HEARTS & HANDS FAITH IN ACTION":"Basic needs & response","HIGHLAND CLUBHOUSE":"Community & economic development","KENAN CENTER INC":"Health & wellbeing","LOCKPORT CARES INC":"Education & youth","LOCKPORT ICE ARENA AND SPORTS CENTER INC":"Health & wellbeing","MORLOCK FOUNDATION INC":"Basic needs & response","PETS ALIVE":"Environment & animals","PINNACLE COMMUNITY SERVICES":"Basic needs & response","SABAH FOUNDATION INC":"Nonprofit capacity & transitions","SAVE THE MICHAELS OF THE WORLD INC":"Health & wellbeing","UNITED WAY OF GREATER NIAGARA":"Nonprofit capacity & transitions","WNY HEROES INC":"Basic needs & response","ATMOSPHERE SALON INC":"Community & economic development","OPERATION WARM INC":"Basic needs & response","COMMUNITY MISSIONS OF NIAGARA FRONTIER":"Basic needs & response","EPIC-EVERY PERSON INFLUENCES CHILDREN INC":"Education & youth","PINK RIBBON GOOD INC":"Health & wellbeing","ANNIE LEEDS ADVENTURE FOUNDATION":"Nonprofit capacity & transitions","FRIENDS OF YOUNGSTOWN":"Health & wellbeing","GLENWOOD CEMETERY FOUNDATION INC":"Nonprofit capacity & transitions","TEN LIVES CLUB INC":"Environment & animals","UNITED CEREBRAL PALSY ASSOCIATION OF NIAGARA COUNTY INC":"Health & wellbeing"};
   const CAT_OTHER = 'Other filed purposes';
   const CAT_SUBJECTS = [
     { key: 'Education & youth',
@@ -1662,6 +1666,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
       const R = g.r.toUpperCase();
       for (const c of CAT_SUBJECTS) if (c.rx.test(R)) { res = { key: c.key, step: 2 }; break; }
     }
+    if (!res && NTEE_MAP[g.r]) res = { key: NTEE_MAP[g.r], step: 3 };
     g._ci = res || { key: CAT_OTHER, step: 0 };
     return g._ci;
   }
