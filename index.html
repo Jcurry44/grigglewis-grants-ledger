@@ -8,7 +8,7 @@
 <link rel="canonical" href="https://jcurry44.github.io/grigglewis-grants-ledger/">
 <meta name="robots" content="noindex, nofollow">
 <title>Grigg Lewis Foundation — Grants Ledger · 990-PF</title>
-<meta name="description" content="Every grant Grigg Lewis Foundation reported in its Form 990-PF grants-paid schedule, 2020 and 2022–2024 — 326 grants, $5,817,145, reconciling to Part I line 25(d) to the dollar. An independent presentation built from public IRS filings.">
+<meta name="description" content="Every grant Grigg Lewis Foundation reported in its Form 990-PF grants-paid schedule, 2020–2024 — 326 grants, $5,817,145, reconciling to Part I line 25(d) to the dollar. An independent presentation built from public IRS filings.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Grigg Lewis Foundation — Grants Ledger">
 <meta property="og:description" content="326 grants · $5,817,145 · four filed years, each reconciling to Part I line 25(d) exactly. Computed from the foundation’s own public 990-PF filings.">
@@ -437,6 +437,9 @@ h1 {
 .penny b.k { color: var(--ink); }
 .penny-grid.dim .penny:not(.hot) { opacity: 0.18; }
 .penny-grid.dim .penny.hot { transform: scale(1.1); }
+/* the coin grid is a hover instrument; on touch screens and small phones the
+   category rows carry the same figures, so the coins step aside */
+@media (hover: none), (max-width: 640px) { .penny-grid { display: none; } .dollar-viz { grid-template-columns: 1fr; margin-top: 0.5rem; } }
 .cat-rows { display: flex; flex-direction: column; }
 .cat-row {
   appearance: none; background: none; border: 0; font: inherit; cursor: pointer;
@@ -1151,7 +1154,7 @@ select {
   <div class="wrap">
     <div class="topbar">
       <span class="mark">Grants Ledger<span class="tm">.</span></span>
-      <span class="tb-meta">TY2020, 2022–2024</span>
+      <span class="tb-meta">TY2020–2024</span>
       <span class="tb-meta">Checked 2026-08-23</span>
       <span class="spacer"></span>
       <a href="https://projects.propublica.org/nonprofits/organizations/161550858" target="_blank" rel="noopener">The filings ↗</a>
@@ -1165,7 +1168,7 @@ select {
           <strong>The grants the foundation awarded</strong> — every dollar paid to 147 organizations,
           as reported in its Form&nbsp;990-PF grants-paid schedule (Part&nbsp;XIV in current filings, formerly
           Part&nbsp;XV) and <strong>reconciled to Part&nbsp;I, line&nbsp;25(d), to the dollar,</strong> for tax
-          years 2020 and 2022–2024. Built from the foundation’s own public IRS filings.
+          years 2020–2024. Built from the foundation’s own public IRS filings.
         </p>
         <div class="hero-actions">
           <button type="button" class="btn-primary" id="explore-btn">Explore the grants</button>
@@ -1513,7 +1516,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
   const grants = DATA.grants;
   const tieout = DATA.meta.tieout;
   const LATEST = YEARS[YEARS.length - 1];
-  const PREV = YEARS[YEARS.length - 2];
+  const PREV = YEARS.length > 1 ? YEARS[YEARS.length - 2] : null;   // a one-year record has no prior year
 
   // ---------- formatting ----------
   const money = (n) => '$' + Number(n).toLocaleString('en-US');
@@ -1623,7 +1626,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
     ? sortedAmts[(sortedAmts.length - 1) / 2]
     : (sortedAmts[sortedAmts.length / 2 - 1] + sortedAmts[sortedAmts.length / 2]) / 2;
   const top5Share = entList.slice(0, 5).reduce((s, e) => s + e.total, 0) / GRAND;
-  const latestDelta = (byYear[LATEST].sum - byYear[PREV].sum) / byYear[PREV].sum;
+  const latestDelta = PREV === null ? null : (byYear[LATEST].sum - byYear[PREV].sum) / byYear[PREV].sum;
 
   // purpose taxonomy — two published steps. Step 1: keywords in the filed purpose,
   // field categories before mechanism categories (a scholarship for a science hall
@@ -1699,7 +1702,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
     newIn[y] = nw; returningIn[y] = ret;
   });
   const movers = entList
-    .map((e) => ({ e, prev: entYearSum(e, PREV), cur: entYearSum(e, LATEST) }))
+    .map((e) => ({ e, prev: PREV === null ? 0 : entYearSum(e, PREV), cur: entYearSum(e, LATEST) }))
     .filter((m) => m.prev > 0 || m.cur > 0)
     .map((m) => ({ ...m, d: m.cur - m.prev }))
     .sort((a, b) => Math.abs(b.d) - Math.abs(a.d))
@@ -1890,6 +1893,13 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
   // ---------- overview ----------
   function renderTrend() {
     const host = $('trend');
+    if (YEARS.length < 2) {           // one filed year is not a trend; hide the card entirely
+      const card = $('trend').closest('.card');
+      if (card) card.hidden = true;
+      const cards = document.getElementById('tr-cards');
+      if (cards) cards.hidden = true;
+      return;
+    }
     const tipEl = $('tr-tip');
     const W = 560, H = 228, pad = { t: 34, r: 18, b: 16, l: 36 };
     const maxV = Math.max(...YEARS.map((y) => byYear[y].sum)) * 1.12;
@@ -2045,7 +2055,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
           });
           return [...m.values()].sort((a, b) => b.sum - a.sum).map((c) => ({ ...c, color: catColorOf(c.key) }));
         })();
-    const sPrev = SY === null ? PREV : (SY > YEARS[0] ? SY - 1 : null);
+    const sPrev = SY === null ? PREV : (YEARS.indexOf(SY) > 0 ? YEARS[YEARS.indexOf(SY) - 1] : null);
     const sMovers = SY === null ? movers
       : (sPrev === null ? [] : entList
           .map((e) => ({ e, prev: entYearSum(e, sPrev), cur: entYearSum(e, SY) }))
@@ -2749,7 +2759,7 @@ window.GRIGGLEWIS_DATA={"meta":{"foundation":"Grigg Lewis Foundation","ein":"16-
     const dEl = $('kpi-delta');
     dEl.classList.remove('up', 'down');
     const dy = SY !== null ? SY : LATEST;
-    const dp = dy > YEARS[0] ? dy - 1 : null;
+    const dp = YEARS.indexOf(dy) > 0 ? YEARS[YEARS.indexOf(dy) - 1] : null; // prior FILED year, not dy-1 (years can be non-contiguous when one is withheld)
     dEl.parentElement.querySelector('.k-label').textContent = SY === null ? 'Latest year' : 'Year change';
     if (dp === null) {
       dEl.textContent = '—';
